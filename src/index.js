@@ -1,24 +1,41 @@
 const restify = require('restify');
 const pgRestify = require('pg-restify');
+const hooks = new pgRestify.Hooks();
 
-// create a simple restify server
+hooks.addPreHookForAllResources('getList', function(req, res, dbClient, next){
+
+    req.pgRestifyWhere = {};
+    for (let key in req.query){
+        switch (key){
+            case 'pageSize':
+            case 'page':
+            case 'orderBy':
+            case 'orderByDesc':
+                break;
+            default:
+                req.pgRestifyWhere[key] = req.query[key];
+        }
+    }
+    return next();
+
+});
+
 const server = restify.createServer();
 
-// add any additional custom server configuration
 
-// add the pgRestify functionality
-// by providing the restify instance
-// and a server connection string
 pgRestify.initialize({
     server: server,
-    pgConfig: 'postgres://postgres@localhost:5433/rest'
+    pgConfig: {
+        user: 'postgres',
+        database: 'rest',
+        host: 'localhost',
+        port: 5433,
+    },
+    hooks: hooks
 }, function(err, pgRestifyInstance) {
 
-    // If there is an error initializing you will see it here.
     if (err) throw err;
 
-    // now that the query to get table metadata is done,
-    // start the server
-    server.listen(6666);
+    server.listen(6142);
 
 });
