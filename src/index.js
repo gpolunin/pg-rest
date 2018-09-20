@@ -1,7 +1,7 @@
 const restify = require('restify');
 const pgRestify = require('pg-restify');
 const hooks = new pgRestify.Hooks();
-//test commit 7
+//test commit 8
 hooks.addPreHookForAllResources('getList', function(req, res, dbClient, next){
 
     req.pgRestifyWhere = {};
